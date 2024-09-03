@@ -2,6 +2,7 @@ import csv
 import time
 from dataclasses import dataclass
 from selenium import webdriver
+from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -43,13 +44,15 @@ def save_to_csv(filename, products):
     """Saves a list of Product objects to a CSV file."""
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Title", "Description",
-                         "Price", "Rating", "Number of Reviews"])
+        writer.writerow(["Title", "Description", "Price", "Rating", "Number of Reviews"])
         for product in products:
-            writer.writerow([product.title,
-                             product.description,
-                             product.price,
-                             product.rating, product.num_of_reviews])
+            writer.writerow(
+                [product.title,
+                 product.description,
+                 product.price,
+                 product.rating,
+                 product.num_of_reviews]
+            )
 
 
 def get_all_products():
@@ -61,11 +64,12 @@ def get_all_products():
     driver.get(HOME_URL)
     try:
         accept_cookies = driver.find_element(
-            By.ID, "onetrust-accept-btn-handler")
+            By.ID, "onetrust-accept-btn-handler"
+        )
         accept_cookies.click()
         time.sleep(1)
-    except Exception as e:
-        print("No cookies button found:", e)
+    except NoSuchElementException:
+        print("Accept cookies button not found. Continuing...")
 
     pages = [
         {"url": HOME_URL, "filename": "home.csv"},
